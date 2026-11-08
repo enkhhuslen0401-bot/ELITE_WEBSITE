@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ELITE CLAN — Ultimate CS2 Esports Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #ff4655;
+            --primary-glow: rgba(255, 70, 85, 0.7);
+            --bg-main: #05080f;
+            --bg-card: rgba(12, 18, 28, 0.9);
+            --border-card: rgba(255, 70, 85, 0.35);
+            --text-main: #f0f2f5;
+            --text-muted: #8c9ba5;
+            --discord-color: #5865F2;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Rajdhani', sans-serif; scroll-behavior: smooth; }
+        body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; overflow-x: hidden; perspective: 1000px; }
+
+        #trailCanvas {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999;
+        }
+
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(255,70,85,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,70,85,0.04) 1px, transparent 1px);
+            background-size: 35px 35px; z-index: -2;
+        }
+
+        header {
+            padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(5, 8, 15, 0.95); border-bottom: 2px solid rgba(255, 70, 85, 0.4);
+            position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(15px); flex-wrap: wrap; gap: 10px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.8);
+        }
+
+        .logo { font-family: 'Teko', sans-serif; font-size: 2.6rem; font-weight: 700; color: #fff; letter-spacing: 2px; text-transform: uppercase; }
+        .logo span { color: var(--primary); text-shadow: 0 0 15px var(--primary-glow); }
+
+        nav { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+        nav a { color: var(--text-main); text-decoration: none; font-weight: 600; font-size: 1rem; transition: 0.3s; }
+        nav a:hover { color: var(--primary); text-shadow: 0 0 10px var(--primary-glow); }
+
+        .discord-btn {
+            background: var(--discord-color); color: #fff; border: none; padding: 7px 14px; border-radius: 8px;
+            font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; text-decoration: none; font-size: 0.9rem; transition: 0.3s;
+        }
+        .discord-btn:hover { box-shadow: 0 0 18px rgba(88, 101, 242, 0.9); transform: translateY(-2px); }
+
+        .steam-login-btn {
+            background: linear-gradient(135deg, #171a21 0%, #2a475e 100%); color: #fff; border: 1px solid #66c0f4;
+            padding: 7px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;
+            text-decoration: none; font-size: 0.9rem; transition: 0.3s;
+        }
+        .steam-login-btn:hover { background: #66c0f4; color: #000; box-shadow: 0 0 18px rgba(102, 192, 244, 0.9); transform: translateY(-2px); }
+
+        .user-logged-in {
+            background: rgba(255, 70, 85, 0.2); border: 1px solid var(--primary); padding: 6px 14px;
+            border-radius: 8px; color: #fff; font-weight: 700; display: flex; align-items: center; gap: 8px; font-size: 0.9rem;
+            box-shadow: 0 0 15px rgba(255,70,85,0.3);
+        }
+
+        .container { max-width: 1200px; margin: 2.5rem auto; padding: 0 1rem; }
+        .section-title { 
+            font-family: 'Teko', sans-serif; font-size: 2.8rem; text-transform: uppercase; margin-bottom: 1.5rem; 
+            color: #fff; border-bottom: 3px solid var(--primary); display: inline-block; letter-spacing: 1.5px;
+            text-shadow: 0 0 12px rgba(255,70,85,0.6);
+        }
+
+        .tilt-card { 
+            background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 16px; 
+            padding: 2rem; margin-bottom: 2.5rem; box-shadow: 0 20px 45px rgba(0,0,0,0.85); 
+            backdrop-filter: blur(14px); transform-style: preserve-3d; transition: transform 0.2s ease, box-shadow 0.3s ease;
+        }
+        .tilt-card:hover { box-shadow: 0 25px 50px rgba(255,70,85,0.15); }
+
+        .weapon-showcase-card {
+            background: radial-gradient(circle, rgba(255,70,85,0.18) 0%, rgba(8,12,20,0.95) 85%);
+            border: 2px solid var(--primary); border-radius: 16px; padding: 1.5rem; margin-bottom: 2.5rem;
+            text-align: center; box-shadow: 0 0 35px var(--primary-glow); transform-style: preserve-3d;
+        }
+        .weapon-canvas-container { width: 100%; height: 220px; display: flex; justify-content: center; align-items: center; cursor: grab; }
+        .weapon-3d-box { font-size: 7.5rem; color: var(--primary); filter: drop-shadow(0 0 30px var(--primary-glow)); transition: transform 0.1s ease-out; user-select: none; }
+
+        .about-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; align-items: center; }
+        @media(max-width: 768px) { .about-grid { grid-template-columns: 1fr; } }
+        .about-text { font-size: 1.15rem; line-height: 1.85; color: #d0d5dd; }
+        .stat-box { background: rgba(0, 0, 0, 0.7); border: 1px solid var(--border-card); border-radius: 12px; padding: 1.5rem; text-align: center; box-shadow: inset 0 0 15px rgba(255,70,85,0.1); }
+        .stat-number { font-family: 'Teko', sans-serif; font-size: 3.8rem; color: var(--primary); font-weight: 700; line-height: 1; text-shadow: 0 0 20px var(--primary-glow); }
+
+        .roster-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+        .category-tabs { display: flex; gap: 10px; flex-wrap: wrap; }
+        .tab-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 1rem; transition: 0.3s; }
+        .tab-btn.active, .tab-btn:hover { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 22px var(--primary-glow); transform: translateY(-2px); }
+
+        .search-box { padding: 11px 16px; background: rgba(0, 0, 0, 0.75); border: 1px solid var(--border-card); color: #fff; border-radius: 8px; font-size: 1rem; width: 100%; max-width: 270px; outline: none; transition: 0.3s; }
+        .search-box:focus { border-color: #fff; box-shadow: 0 0 15px var(--primary-glow); }
+
+        .roster-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .roster-card { 
+            background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 14px; 
+            padding: 2.2rem 1.3rem; text-align: center; border-top: 6px solid var(--primary); 
+            position: relative; overflow: hidden; transform-style: preserve-3d; transition: transform 0.2s ease, box-shadow 0.3s;
+        }
+        .roster-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px var(--primary-glow); }
+        .roster-card h4 { font-size: 2.1rem; color: #fff; font-family: 'Teko', sans-serif; margin-bottom: 4px; letter-spacing: 1px; }
+        .player-role { color: var(--primary); font-weight: 700; font-size: 0.95rem; margin-bottom: 15px; letter-spacing: 1.2px; }
+
+        .stats-list { background: rgba(255, 255, 255, 0.04); border-radius: 10px; padding: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.95rem; }
+        .stat-item { color: var(--text-muted); }
+        .stat-value { color: #fff; font-weight: 700; }
+
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+        .form-group { margin-bottom: 1.4rem; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 700; color: #d0d5dd; font-size: 1rem; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 14px; background: rgba(0, 0, 0, 0.8); border: 1px solid var(--border-card); color: #fff; border-radius: 8px; font-size: 1rem; outline: none; transition: 0.3s; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); box-shadow: 0 0 12px var(--primary-glow); }
+
+        .btn-submit { background: linear-gradient(135deg, var(--primary) 0%, #b81c2c 100%); color: #fff; border: none; padding: 16px; font-weight: 700; border-radius: 8px; cursor: pointer; width: 100%; font-size: 1.3rem; text-transform: uppercase; font-family: 'Teko', sans-serif; letter-spacing: 2px; transition: 0.3s; }
+        .btn-submit:hover { box-shadow: 0 0 30px var(--primary-glow); transform: translateY(-3px); }
+
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.95rem; }
+        .admin-table th, .admin-table td { padding: 14px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .admin-table th { color: var(--primary); font-family: 'Teko', sans-serif; font-size: 1.5rem; letter-spacing: 1px; }
+
+        .dev-badge {
+            background: linear-gradient(135deg, rgba(255,70,85,0.2), rgba(0,0,0,0.9));
+            border: 1px solid var(--primary); border-radius: 14px; padding: 1.6rem;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem;
+            box-shadow: 0 0 30px rgba(255,70,85,0.3); flex-wrap: wrap; gap: 15px;
+        }
+
+        #admin { display: none; } /* Зөвхөн админд харагдана */
+        footer { text-align: center; padding: 3rem; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.1); margin-top: 4rem; font-size: 0.95rem; }
+    </style>
+</head>
+<body>
+
+    <canvas id="trailCanvas"></canvas>
+
+    <header>
+        <div class="logo"><i class="fa-solid fa-crosshairs" style="color: var(--primary);"></i> ELITE <span>CLAN</span></div>
+        <nav>
+            <a href="#about">Бидний Тухай</a>
+            <a href="#weapon3d">3D Буу</a>
+            <a href="#roster">Бүрэлдэхүүн</a>
+            <a href="#apply">Анкет</a>
+            <a href="#admin" id="adminNavLink" style="color: var(--primary); display: none;">Админ</a>
+            
+            <a href="https://discord.gg/your-elite-clan-link" target="_blank" class="discord-btn"><i class="fa-brands fa-discord"></i> Discord</a>
+
+            <div id="authNav">
+                <a href="/api/auth/steam" class="steam-login-btn"><i class="fa-brands fa-steam"></i> Steam</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        
+        <!-- Developer Badge -->
+        <div class="dev-badge tilt-card">
+            <div>
+                <h3 style="font-family: 'Teko'; font-size: 1.9rem; color: #fff; letter-spacing: 1px;">СИСТЕМИЙН ХӨГЖҮҮЛЭГЧ</h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">CS2 Esports Portal Architecture & Novacs API Integration</p>
+            </div>
+            <div><i class="fa-solid fa-code" style="color: var(--primary);"></i> Developer: <span style="color:#fff; font-weight:700;">anclous</span></div>
+        </div>
+
+        <!-- 3D Interactive CS2 Weapon Box -->
+        <div id="weapon3d" class="weapon-showcase-card tilt-card">
+            <h2 class="section-title" style="font-size: 2.3rem; margin-bottom: 5px;">CS2 3D WEAPON</h2>
+            <p style="color: var(--text-muted); margin-bottom: 10px; font-size: 0.95rem;">Хулгана эсвэл хуруугаараа чирж эргүүлж үзнэ үү</p>
+            <div class="weapon-canvas-container" id="weaponContainer">
+                <div class="weapon-3d-box" id="weapon3dBox">
+                    <i class="fa-solid fa-gun"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Us -->
+        <div id="about" class="tilt-card">
+            <h2 class="section-title">Кланы Тухай</h2>
+            <div class="about-grid">
+                <p class="about-text">
+                    <strong>ELITE CLAN</strong> бол Novacs платформын дэвжээнд сахилга бат, тактик болон өндөр ур чадварыг гайхуулж буй Монголын CS2 шилдэг клануудын нэг юм. Бид ялалт болон нэгдмэл байдлын төлөө зогсдог!
+                </p>
+                <div class="stat-box">
+                    <div class="stat-number" id="totalMembersCount">10</div>
+                    <div style="color: var(--text-muted); font-weight: 700; margin-top: 5px;">Элит Тоглогчид</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Roster Section -->
+        <div id="roster" class="tilt-card">
+            <h2 class="section-title">Кланы Бүрэлдэхүүн</h2>
+            
+            <div class="roster-controls">
+                <div class="category-tabs">
+                    <button class="tab-btn active" onclick="filterRoster('main', this)">Үндсэн Баг</button>
+                    <button class="tab-btn" onclick="filterRoster('streamer', this)">Creators</button>
+                </div>
+                <input type="text" id="searchPlayer" class="search-box" placeholder="Тоглогч хайх..." onkeyup="searchRoster()">
+            </div>
+
+            <div class="roster-grid" id="rosterContainer">
+                <div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: var(--text-muted);">
+                    <i class="fa-solid fa-spinner fa-spin fa-2x"></i><br><br>Датаг татаж байна...
+                </div>
+            </div>
+        </div>
+
+        <!-- Application Form -->
+        <div id="apply" class="tilt-card">
+            <h2 class="section-title">Кланд Элсэх Анкет</h2>
+
+            <form id="recruitmentForm">
+                <div class="form-group">
+                    <label>Discord Tag</label>
+                    <input type="text" id="discordTag" placeholder="Жишээ нь: anclous" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Category (Баг)</label>
+                    <select id="category" required>
+                        <option value="Үндсэн баг (Main Roster)">Үндсэн баг (Main Roster)</option>
+                        <option value="Streamer / Content">Streamer / Content Creator</option>
+                    </select>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Нас</label>
+                        <input type="number" id="age" placeholder="Нас" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Хүйс</label>
+                        <select id="gender" required>
+                            <option value="Эрэгтэй">Эрэгтэй</option>
+                            <option value="Эмэгтэй">Эмэгтэй</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>CS2 Тоглосон цаг</label>
+                        <input type="text" id="hours" placeholder="Нийт цаг" required>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>FACEIT Level</label>
+                        <input type="text" id="faceit" placeholder="Level / ELO" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Premier ELO</label>
+                        <input type="text" id="premier" placeholder="Premier оноо" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Novacs Rank</label>
+                        <input type="text" id="novaRank" placeholder="Novacs rank" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Өмнөх Clan</label>
+                    <input type="text" id="prevClans" placeholder="Өмнө нь байсан кланууд">
+                </div>
+
+                <div class="form-group">
+                    <label>Элсэх Шалтгаан</label>
+                    <textarea id="reason" rows="3" placeholder="Яагаад ELITE clan-д орохыг хүсэж байна вэ?" required></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit">Анкет Илгээх</button>
+            </form>
+        </div>
+
+        <!-- Admin Panel Section -->
+        <div id="admin" class="tilt-card">
+            <h2 class="section-title">Админ Хяналтын Самбар</h2>
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Steam Player / ID</th>
+                            <th>Discord Tag</th>
+                            <th>Баг</th>
+                            <th>Нас/Хүйс</th>
+                            <th>FACEIT/Premier</th>
+                            <th>Огноо</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTableBody">
+                        <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Ирсэн анкет байхгүй байна.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        &copy; 2026 ELITE CLAN. Powered by Novacs API & Steam OpenID.
+    </footer>
+
+    <script>
+        // --- DEVELOPER ADMIN CONTROL (Таны Steam ID) ---
+        const DEVELOPER_STEAM_ID = "76561199860386528";
+
+        const urlParams = new URLSearchParams(window.location.search);
+        let steamId = urlParams.get('steamid') || localStorage.getItem('elite_steamid');
+        let steamName = urlParams.get('name') || localStorage.getItem('elite_steamname');
+        let steamAvatar = urlParams.get('avatar') || localStorage.getItem('elite_steamavatar');
+
+        if (urlParams.get('steamid')) {
+            localStorage.setItem('elite_steamid', steamId);
+            if (steamName) localStorage.setItem('elite_steamname', steamName);
+            if (steamAvatar) localStorage.setItem('elite_steamavatar', steamAvatar);
+        }
+
+        if (steamId) {
+            document.getElementById('authNav').innerHTML = `
+                <div class="user-logged-in">
+                    ${steamAvatar ? `<img src="${decodeURIComponent(steamAvatar)}" style="width:24px; height:24px; border-radius:50%; vertical-align:middle; margin-right:6px;">` : '<i class="fa-brands fa-steam"></i>'}
+                    <span>${steamName ? decodeURIComponent(steamName) : 'User'}</span>
+                </div>
+            `;
+            if (steamId === DEVELOPER_STEAM_ID) {
+                document.getElementById('admin').style.display = 'block';
+                document.getElementById('adminNavLink').style.display = 'inline-block';
+            }
+        }
+
+        // --- ENANCED GLOWING MOUSE & TOUCH TRAIL EFFECT ---
+        const canvas = document.getElementById('trailCanvas');
+        const ctx = canvas.getContext('2d');
+        let points = [];
+
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function addPoint(x, y) {
+            points.push({ 
+                x: x, y: y, 
+                radius: Math.random() * 7 + 5, 
+                alpha: 1,
+                vx: (Math.random() - 0.5) * 1.8,
+                vy: (Math.random() - 0.5) * 1.8
+            });
+        }
+
+        window.addEventListener('mousemove', (e) => addPoint(e.clientX, e.clientY));
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) addPoint(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
+
+        function animateTrail() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < points.length; i++) {
+                let p = points[i];
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.shadowBlur = 18;
+                ctx.shadowColor = '#ff4655';
+                ctx.fillStyle = `rgba(255, 70, 85, ${p.alpha})`;
+                ctx.fill();
+                ctx.restore();
+                p.x += p.vx; p.y += p.vy;
+                p.radius *= 0.91; p.alpha -= 0.03;
+            }
+            points = points.filter(p => p.alpha > 0 && p.radius > 0.5);
+            requestAnimationFrame(animateTrail);
+        }
+        animateTrail();
+
+        // --- 3D WEAPON ROTATION ---
+        const weaponContainer = document.getElementById('weaponContainer');
+        const weaponBox = document.getElementById('weapon3dBox');
+        let isDragging = false, rotX = 0, rotY = 0, startX = 0, startY = 0;
+
+        weaponContainer.addEventListener('mousedown', (e) => { isDragging = true; startX = e.clientX; startY = e.clientY; });
+        window.addEventListener('mouseup', () => isDragging = false);
+        weaponContainer.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            rotY += (e.clientX - startX) * 0.5; rotX -= (e.clientY - startY) * 0.5;
+            startX = e.clientX; startY = e.clientY;
+            weaponBox.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg) scale(1.12)`;
+        });
+
+        weaponContainer.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) { isDragging = true; startX = e.touches[0].clientX; startY = e.touches[0].clientY; }
+        });
+        window.addEventListener('touchend', () => isDragging = false);
+        weaponContainer.addEventListener('touchmove', (e) => {
+            if (!isDragging || e.touches.length === 0) return;
+            rotY += (e.touches[0].clientX - startX) * 0.5; rotX -= (e.touches[0].clientY - startY) * 0.5;
+            startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+            weaponBox.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg) scale(1.12)`;
+        }, { passive: true });
+
+        // --- ROSTER LOGIC ---
+        let allRosterData = [];
+        let currentCategory = 'main';
+
+        async function fetchRoster() {
+            try {
+                const response = await fetch('/api/clan/roster');
+                const result = await response.json();
+                if (result.success && result.roster) {
+                    allRosterData = result.roster;
+                    document.getElementById('totalMembersCount').innerText = result.total;
+                    filterRoster('main');
+                }
+            } catch (err) {}
+        }
+
+        async function fetchAdminApplications() {
+            try {
+                const res = await fetch('/api/admin/applications');
+                const data = await res.json();
+                if (data.success && data.applications.length > 0) {
+                    const tbody = document.getElementById('adminTableBody');
+                    tbody.innerHTML = '';
+                    data.applications.forEach(app => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td><strong>${app.steamName}</strong><br><small style="color:var(--text-muted);">${app.steamId}</small></td>
+                                <td>${app.discordTag}</td>
+                                <td>${app.category}</td>
+                                <td>${app.age} / ${app.gender}</td>
+                                <td>F: ${app.faceit} | P: ${app.premier}</td>
+                                <td>${app.date}</td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (err) {}
+        }
+
+        function filterRoster(category, btnElement) {
+            currentCategory = category;
+            if (btnElement) {
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                btnElement.classList.add('active');
+            }
+            renderRoster(allRosterData.filter(m => m.category === category));
+        }
+
+        function searchRoster() {
+            const query = document.getElementById('searchPlayer').value.toLowerCase();
+            const filtered = allRosterData.filter(m => m.category === currentCategory && m.name.toLowerCase().includes(query));
+            renderRoster(filtered);
+        }
+
+        function renderRoster(players) {
+            const container = document.getElementById('rosterContainer');
+            container.innerHTML = '';
+            if (players.length === 0) {
+                container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">Тоглогч олдсонгүй.</div>`;
+                return;
+            }
+            players.forEach(player => {
+                const card = document.createElement('div');
+                card.className = 'roster-card';
+                card.innerHTML = `
+                    <h4>${player.name}</h4>
+                    <div class="player-role">${player.role}</div>
+                    <div class="stats-list">
+                        <div class="stat-item">Level: <span class="stat-value">${player.level}</span></div>
+                        <div class="stat-item">Points: <span class="stat-value">${player.points}</span></div>
+                        <div class="stat-item" style="grid-column: 1/-1; text-align: center; margin-top: 4px;">Kills: <span class="stat-value">${player.kills}</span></div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        document.getElementById('recruitmentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (!steamId) {
+                alert('⚠️ Анкет илгээхийн тулд заавал "Steam нэвтрэх" товчоор нэвтэрнэ үү!');
+                window.location.href = '/api/auth/steam';
+                return;
+            }
+
+            const payload = {
+                discordTag: document.getElementById('discordTag').value,
+                category: document.getElementById('category').value,
+                age: document.getElementById('age').value,
+                gender: document.getElementById('gender').value,
+                hours: document.getElementById('hours').value,
+                faceit: document.getElementById('faceit').value,
+                premier: document.getElementById('premier').value,
+                novaRank: document.getElementById('novaRank').value,
+                prevClans: document.getElementById('prevClans').value,
+                reason: document.getElementById('reason').value,
+                steamId: steamId,
+                steamName: steamName ? decodeURIComponent(steamName) : 'Steam Player'
+            };
+
+            try {
+                const res = await fetch('/api/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('🎉 Таны анкет амжилттай илгээгдлээ!');
+                    this.reset();
+                    fetchAdminApplications();
+                }
+            } catch (err) {
+                alert('Сервертэй холбогдож чадсангүй.');
+            }
+        });
+
+        fetchRoster();
+        fetchAdminApplications();
+    </script>
+</body>
+</html>
